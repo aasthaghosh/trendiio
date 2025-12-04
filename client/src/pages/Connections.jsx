@@ -37,7 +37,7 @@ const Connections = () => {
         </div>
 
         {/* Tabs  */}
-        <div className='inline flex flex-wrap items-center border border-gray-200 rounded-md bg-white shadow-sm'>
+        <div className='inline-flex flex-wrap items-center border border-gray-200 rounded-md p-1 bg-white shadow-sm'>
           {
             dataArray.map((tab)=>(
               <button onClick={()=>setCurrentTab(tab.label)} key={tab.label} className={`cursor-pointer flex items-center px-3 py-1 text-sm rounded-md transition-colors ${currentTab === tab.label  ? 'bg-white font-medium text-black' :'text-gray-500 hover:text-black'}`}>
@@ -54,7 +54,7 @@ const Connections = () => {
         {/* Conections  */}
         <div className='flex flex-wrap gap-6 mt-6'>
           {dataArray.find((item)=>item.label === currentTab).value.map((user)=>(
-            <div key={user._id} className='w-full max-w-88 flex gap-5 p-6 bg-white shadow rounded-md'>
+            <div key={user._id} className='w-full max-w-sm flex gap-5 p-6 bg-white shadow rounded-md'>
               <img src={user.profile_picture}  alt="" className='rounded-full w-12 h-12 shadow-md mx-auto'/>
               <div className='flex-1'>
                 <p className='font-medium text-slate-700'>{user.full_name}</p>
