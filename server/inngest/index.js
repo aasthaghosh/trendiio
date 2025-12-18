@@ -1,5 +1,5 @@
 import { Inngest } from "inngest";
-import User from "../models/User";
+import User from "../models/User.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "trendiio-app" });
@@ -9,9 +9,9 @@ const syncUserCreation = inngest.createFunction(
     {id: 'sync-user-from-clerk'},
     {event: 'clerk/user.created'},
     async({event}) =>{
-        const {id, first_name, last_name, email_address, image_url} =event.data
+        const {id, first_name, last_name, email_addresses, image_url} =event.data
 
-        let username = email_address[0].email_address.split('@')[0]
+        let username = email_addresses[0].email_address.split('@')[0]
 
         //check availablity of username
 
@@ -22,12 +22,12 @@ const syncUserCreation = inngest.createFunction(
         }
         const userData = {
             _id: id,
-            email: email_address[0].email_address,
+            email: email_addresses[0].email_address,
             full_name : first_name + " "+ last_name,
             profile_picture: image_url,
             username
         }
-        await User.create(UserData)
+        await User.create(userData)
     }
 )
 
@@ -36,14 +36,14 @@ const syncUserUpdation= inngest.createFunction(
     {id: 'update-user-from-clerk'},
     {event: 'clerk/user.updated'},
     async({event}) =>{
-        const {id, first_name, last_name, email_address, image_url} =event.data
+        const {id, first_name, last_name, email_addresses, image_url} =event.data
 
         const upatedUserData = {
-            email: email_address[0].email_address,
+            email: email_addresses[0].email_address,
             full_name: first_name+ ' '+ last_name,
             profile_picture: image_url
         }
-        await User.findOneAndUpdate(id, upatedUserData)
+        await User.findByIdAndUpdate(id, upatedUserData)
     }
 )
 
