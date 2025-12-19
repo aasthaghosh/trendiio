@@ -23,7 +23,7 @@ export const getUserData = async (req,res) => {
 //update user data
 export const updateUserData = async (req,res) => {
     try{
-        const {userId} = await req.auth()
+        const {userId} =  req.auth()
         let {username, bio, location, full_name} = req.body
 
         const tempUser = await User.findById(userId)
@@ -177,7 +177,7 @@ export const unfollowUser = async (req,res) => {
 
 export const sendConnectionRequest = async (req, res) =>{
     try{
-        const {userId} = await req.auth()
+        const {userId} =  req.auth()
         const { id } = req.body;
 
         //Check if user has sent more than 20 connection requests in last 24 hours
@@ -217,7 +217,7 @@ export const sendConnectionRequest = async (req, res) =>{
 
 export const getUserConnections = async (req, res) =>{
     try{
-        const {userId} = await req.auth()
+        const {userId} =  req.auth()
         const user = await User.findById(userId).populate('connections followers following')
 
         const connections = user.connections
@@ -238,7 +238,7 @@ export const getUserConnections = async (req, res) =>{
 //Aceept COnnection Request
 export const acceptConectionRequest = async (req, res) =>{
     try{
-        const {userId} = await req.auth()
+        const {userId} =  req.auth()
         const {id} = req.body
 
         const connection = await Connection.findOne({from_user_id : id, to_user_id: userId})
