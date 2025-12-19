@@ -64,7 +64,7 @@ const syncUserDeletion= inngest.createFunction(
 //Inngest FUnction to send Reminder when a new connection request is added
 const sendNewConnnectionRequestReminder = inngest.createFunction(
     {id: "send-new-connection-request-reminder"},
-    {event: "app/coonection-request"},
+    {event: "app/connection-request"},
     async({event, step})=>{
         const {connectionId} = event.data;
         await step.run('send-connection-request-mail', async() =>{
@@ -72,7 +72,7 @@ const sendNewConnnectionRequestReminder = inngest.createFunction(
             const subject = `👋 New Connection Request`;
             const body =   `
             <div style="font-family: Arial, sans-serif; padding: 20px;">
-                <h2>Hi ${connetion.to_user_id.full_name},</h2>
+                <h2>Hi ${connection.to_user_id.full_name},</h2>
                 <p>You have a new connection request from ${connection.from_user_id.full_name} - @${connection.from_user_id.username}</p>
                 <p>Click <a href="${process.env.FRONTEND_URL}/connections" style="color: #10b981;">here</a> to accept or reject the request</p>
                 <br/>
@@ -94,7 +94,7 @@ const sendNewConnnectionRequestReminder = inngest.createFunction(
             const subject = `👋 New Connection Request`;
             const body =   `
             <div style="font-family: Arial, sans-serif; padding: 20px;">
-                <h2>Hi ${connetion.to_user_id.full_name},</h2>
+                <h2>Hi ${connection.to_user_id.full_name},</h2>
                 <p>You have a new connection request from ${connection.from_user_id.full_name} - @${connection.from_user_id.username}</p>
                 <p>Click <a href="${process.env.FRONTEND_URL}/connections" style="color: #10b981;">here</a> to accept or reject the request</p>
                 <br/>
@@ -105,7 +105,7 @@ const sendNewConnnectionRequestReminder = inngest.createFunction(
                 subject,
                 body
             })
-            return {message: "Remiinder sent."}
+            return {message: "Reminder sent."}
             
         })
 
