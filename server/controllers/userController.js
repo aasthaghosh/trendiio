@@ -23,79 +23,91 @@ export const getUserData = async (req,res) => {
 }
 
 //update user data
-export const updateUserData = async (req,res) => {
-    try{
-        const {userId} =  req.auth()
-        let {username, bio, location, full_name} = req.body
+export const updateUserData = async (req, res) => {
+  try {
+    const { userId } = req.auth()
+    let { username, bio, location, full_name } = req.body
 
-        const tempUser = await User.findById(userId)
+    const tempUser = await User.findById(userId)
+    
 
-        !username && (username = tempUser.username)
+    !username && (username = tempUser.username)
 
-        if(tempUser.username !== username){
-            const user =await User.findOne({username})
-
-            if(user){
-                //we will not chnge the username if it is already taken
-                username = tempUser.username
-            }
+    if (tempUser.username !== username) {
+        const user = await User.findOne({ username })
+        if (user) {
+            username = tempUser.username
         }
-        const updatedData = {
-            username,
-            bio,
-            location,
-            full_name
-        }   
-
-        const profile = req.files.profile && req.files.profile[0]
-        const cover = req.files.cover && req.files.cover[0]
-
-        if(profile){
-            const buffer = fs.readFileSync(profile.path)
-            const response = await imagekit.upload({
-                file: buffer,
-                fileName: profile.originalname
-            })
-
-            const url = imagekit.url({
-                path: response.filePath,
-                transformation: [
-                    {quality: 'auto'},
-                    {format: 'webp'},
-                    {width: '512'}
-                ]
-            })
-            updatedData.profile_picture = url;
-        }
-
-        if(cover){
-            const buffer = fs.readFileSync(cover.path)
-            const response = await imagekit.upload({
-                file: buffer,
-                fileName: cover.originalname
-            })
-
-            const url = imagekit.url({
-                path: response.filePath,
-                transformation: [
-                    {quality: 'auto'},
-                    {format: 'webp'},
-                    {width: '1280'}
-                ]
-            })
-            updatedData.cover_photo = url;
-        }
-
-        const user = await User.findByIdAndUpdate(userId, updatedData, {new: true})
-
-        res.json({success: true, user, message: 'Profile updated successfully'})
-
-
-    }catch(error){
-        console.log(error)
-        res.json({success: false, message: error.message})
     }
+
+    const updatedData = {
+      username,
+      bio,
+      location,
+      full_name
+    }
+
+    // ✅ MEMORY STORAGE FILES
+    const profile = req.files.profile && req.files.profile[0]
+    const cover = req.files.cover && req.files.cover[0]
+
+    
+
+    
+
+    if(profile){
+        const buffer = profile.buffer
+        const response = await imagekit.upload({
+            file: buffer,
+            fileName: profile.originalname,
+        })
+        const url = imagekit.url({
+            path: response.filePath,
+            transformation: [
+                {quality: 'auto'},
+                {format: 'webp'},
+                {width: '512'}
+            ]
+        })
+        updatedData.profile_picture = url
+    }
+
+    if(cover){
+        const buffer = fs.readFileSync(cover.path)
+        const response = await imagekit.upload({
+            file: buffer,
+            fileName: profile.originalname,
+        })
+        const url = imagekit.url({
+            path: response.filePath,
+            transformation: [
+                {quality: 'auto'},
+                {format: 'webp'},
+                {width: '1280'}
+            ]
+        })
+        updateUserData.cover_photo = url;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      updatedData,
+      { new: true }
+    )
+
+    return res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user
+    })
+
+  } catch (error) {
+    console.error("updateUserData error:", error)
+    return res.json({ success: false, message: error.message })
+  }
 }
+
+
 
 
 //Find User using username, email, location, home
@@ -114,7 +126,7 @@ export const discoverUsers = async (req,res) => {
             ]
         }
        )
-       const filteredUsers = allUsers.filter(user=> user._id.toString() !== userId);
+       const filteredUsers = allUsers.filter(user=> user._id !== userId);
        res.json({success: true, users: filteredUsers})
 
     }catch(error){
@@ -159,11 +171,11 @@ export const unfollowUser = async (req,res) => {
 
        const user = await User.findById(userId)
 
-       user.following = user.following.filter(user => user.toString() !== id);
+       user.following = user.following.filter(user => user !== id);
        await user.save()
 
        const toUser = await User.findById(id)
-       toUser.followers = toUser.followers.filter(user => user.toString() !== userId);
+       toUser.followers = toUser.followers.filter(user => user !== userId);
 
        await toUser.save()
        res.json({success: true, message: 'Your are no longer following this user'})

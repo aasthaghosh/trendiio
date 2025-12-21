@@ -26,7 +26,7 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use('/api/user', userRouter)
 app.use('/api/post', postRouter)
 app.use('/api/story', storyRouter)
-app.use('/api/story', messageRouter)
+app.use('/api/message', messageRouter)
 
 
 

@@ -8,7 +8,7 @@ import { addPost, getFeedPost, likePost } from '../controllers/postController.js
 
  postRouter.post('/add', upload.array('images', 4), protect, addPost)
  postRouter.get('/feed', protect, getFeedPost)
- postRouter.post('/feed', protect, likePost)
+ postRouter.post('/like', protect, likePost)
 
  export default postRouter
 

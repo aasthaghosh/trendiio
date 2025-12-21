@@ -9,7 +9,7 @@ const connections = {};
 //Controller function for the SSE endpoint
 export const sseController = (req, res)=>{
     const { userId } = req.params
-    console.log('New client connected: ', userId)
+    
 
     //Set SSE headers
     res.setHeader('Content-Type', 'text/event-stream');
@@ -35,59 +35,73 @@ export const sseController = (req, res)=>{
 
 //Send Message
 export const sendMessage = async (req, res) => {
-    try {
-        const {userId} = req.auth();
-        const{to_user_id, text} = req.body;
-        const image = req.file;
+  try {
+    const { userId } = req.auth()
+    const { to_user_id, text } = req.body
+    const image = req.file
 
-        let media_url = '';
-        let message_type = image ? 'image':'text';
+    let media_url = ''
+    const message_type = image ? 'image' : 'text'
 
-        if(message_type === 'image'){
-           
-           
-           const fileBuffer = fs.readFileSync(image.path)
-            const response = await imagekit.upload({
-                file: fileBuffer,
-                fileName: image.originalname
-            })
+    if (image) {
+      const fileBuffer = image.buffer
+      const base64 = fileBuffer.toString('base64')
+      const file = `data:${image.mimetype};base64,${base64}`
 
-            media_url = imagekit.url({
-                path: response.filePath,
-                transformation: [
-                    {quality: 'auto'},
-                    {format: 'webp'},
-                    {width: '1280'}
-                ]
-            })
-                       
-        }
-        const message = await Message.create({
-            from_user_id: userId,
-            to_user_id,
-            text,
-             message_type,
-            media_url
-        })
-        res.json({success: true, message})
+      const response = await imagekit.upload({
+        file,
+        fileName: image.originalname
+      })
 
-        //Send message to to_user_id using SSE
-        const messageWithUserData = await Message.findById(message._id).populate('from_user_id');
-        if(connections[to_user_id]){
-            connections[to_user_id].write(`data: ${JSON.stringify(messageWithUserData)}\n\n`)
-        }
-    } catch (error) {
-        console.log(error);
-        res.json({success: false, message: error.message})
+      media_url = imagekit.url({
+        path: response.filePath,
+        transformation: [
+          { quality: 'auto' },
+          { format: 'webp' },
+          { width: '1280' }
+        ]
+      })
     }
+
+    const message = await Message.create({
+      from_user_id: userId,
+      to_user_id,
+      text,
+      message_type,
+      media_url
+    })
+
+    const messageWithUserData = await Message
+      .findById(message._id)
+      .populate('from_user_id to_user_id')
+
+    if (connections[to_user_id]) {
+      connections[to_user_id].write(
+        `data: ${JSON.stringify(messageWithUserData)}\n\n`
+      )
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: messageWithUserData
+    })
+
+  } catch (error) {
+    console.error('sendMessage error:', error)
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
 }
+
 
 //Get Chat Messages
 
 export const getChatMessages = async (req, res) => {
     try {
         const { userId } = req.auth();
-        const { to_user_id } = req.params;
+        const { to_user_id } = req.body;
 
         const messages = await Message.find({
             $or: [
