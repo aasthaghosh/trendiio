@@ -15,7 +15,9 @@ export const sseController = (req, res)=>{
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin || 'https://trendiio.vercel.app'
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
     //Add the client's respose object to the connections object
     connections[userId] = res

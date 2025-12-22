@@ -15,7 +15,14 @@ const app = express();
 await connectDB();
 
 app.use(express.json())
-app.use(cors());
+const corsOptions = {
+    origin: 'https://trendiio.vercel.app',
+    credentials: true,
+    methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type','Authorization']
+}
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(clerkMiddleware());
 
