@@ -18,7 +18,7 @@ const CreatePost = () => {
   const {getToken} = useAuth()
 
   const handleSubmit = async()=>{
-    if(!images.length & !content){
+    if(!images.length && !content){
       return toast.error('Please add atleast one image or text')
     }
 
@@ -29,26 +29,26 @@ const CreatePost = () => {
       const formData = new FormData();
       formData.append('content', content)
       formData.append('post_type',postType)
-      images.map((image)=> {
+      for(const image of images){
         formData.append('images', image)
-      })
-      const {data} = await api.post('/api/post/add', formData, {headers: {Authorization: `Bearer ${await getToken()}`}})
+      }
+
+      const token = await getToken()
+      const {data} = await api.post('/api/post/add', formData, {headers: {Authorization: `Bearer ${token}`}})
 
       if(data.success){
         navigate('/')
       }else{
-        console.log(data.message)
-        throw new Error(data.message)
+        console.error('Create post failed:', data.message)
+        throw new Error(data.message || 'Create post failed')
       }
 
     } catch (error) {
-
-      console.log(error.message)
-      throw new Error(error.message)
-      
+      console.error('add post error:', error)
+      throw error
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
 
