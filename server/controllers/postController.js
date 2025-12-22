@@ -7,9 +7,14 @@ import User from '../models/User.js';
 //Add Post
 export const addPost = async (req, res) => {
   try {
-    const { userId } = req.auth();
+    const { userId } = await req.auth();
     const { content, post_type } = req.body;
     const images = req.files || [];
+
+    // Debug logs to help reproduce client-side "Network Error" issues
+    console.log('POST /api/post/add - auth userId:', userId)
+    console.log('POST /api/post/add - headers Authorization:', req.headers.authorization ? '[present]' : '[missing]')
+    console.log('POST /api/post/add - files count:', images.length)
 
     let image_urls = [];
 
